@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Nebula Control</title>
+
+<style>
+body{
+    margin:0;
+    font-family: monospace;
+    background:#0a0f1f;
+    color:white;
+}
+
+/* ===== Layout ===== */
+.container{
+    display:flex;
+    height:100vh;
+}
+
+/* ===== Sidebar ===== */
+.sidebar{
+    width:220px;
+    background:#0d1326;
+    border-right:2px solid #00f7ff;
+    padding:20px;
+}
+
+.sidebar h2{
+    color:#00f7ff;
+    text-shadow:0 0 10px #00f7ff;
+}
+
+.sidebar button{
+    width:100%;
+    margin:10px 0;
+    padding:10px;
+    background:#111a33;
+    border:1px solid #00f7ff;
+    color:#00f7ff;
+    cursor:pointer;
+}
+
+.sidebar button:hover{
+    background:#00f7ff;
+    color:black;
+    box-shadow:0 0 15px #00f7ff;
+}
+
+/* ===== Content ===== */
+.content{
+    flex:1;
+    padding:30px;
+}
+
+.section{
+    display:none;
+}
+
+.active{
+    display:block;
+}
+
+/* ===== Panels ===== */
+.panel{
+    background:#101a30;
+    padding:20px;
+    border:1px solid #00f7ff;
+    box-shadow:0 0 15px #00f7ff;
+    margin-bottom:20px;
+}
+
+input, textarea{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    background:#0b1224;
+    border:1px solid #00f7ff;
+    color:white;
+}
+
+button.main{
+    margin-top:15px;
+    padding:10px;
+    background:#00f7ff;
+    border:none;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button.main:hover{
+    box-shadow:0 0 15px #00f7ff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+    <h2>NEBULA</h2>
+    <button onclick="show('access')">Access</button>
+    <button onclick="show('games')">Games</button>
+    <button onclick="show('executor')">Executor</button>
+    <button onclick="show('hub')">Script Hub</button>
+    <button onclick="show('info')">Info</button>
+</div>
+
+<div class="content">
+
+<!-- ACCESS -->
+<div id="access" class="section active">
+    <div class="panel">
+        <h3>Login With Roblox Username</h3>
+        <input id="username" placeholder="Enter Roblox Username">
+        <button class="main" onclick="login()">Login</button>
+        <p id="loginStatus"></p>
+    </div>
+</div>
+
+<!-- GAMES -->
+<div id="games" class="section">
+    <div class="panel">
+        <h3>Game Launcher</h3>
+        <button class="main" onclick="launchGame()">Launch Game</button>
+    </div>
+</div>
+
+<!-- EXECUTOR -->
+<div id="executor" class="section">
+    <div class="panel">
+        <h3>Lua Executor</h3>
+        <textarea id="codeBox" rows="10" placeholder="print('Hello World')"></textarea>
+        <button class="main" onclick="execute()">Execute</button>
+    </div>
+</div>
+
+<!-- SCRIPT HUB -->
+<div id="hub" class="section">
+    <div class="panel">
+        <h3>Script Hub</h3>
+        <button class="main" onclick="loadScript('print(\"Script 1 Loaded\")')">Script 1</button>
+        <button class="main" onclick="loadScript('print(\"Script 2 Loaded\")')">Script 2</button>
+    </div>
+</div>
+
+<!-- INFO -->
+<div id="info" class="section">
+    <div class="panel">
+        <h3>Information</h3>
+        <p>Nebula Control Panel v2</p>
+        <p>Gamepass Required For Access</p>
+    </div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+/* ===== Tab Switch ===== */
+function show(id){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+/* ===== Login ===== */
+async function login(){
+    const username = document.getElementById("username").value;
+
+    const res = await fetch("/check",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ username })
+    });
+
+    const data = await res.json();
+
+    if(data.allowed){
+        document.getElementById("loginStatus").innerText = "ACCESS GRANTED";
+        document.getElementById("loginStatus").style.color = "lime";
+    }else{
+        document.getElementById("loginStatus").innerText = "ACCESS DENIED - BUY GAMEPASS";
+        document.getElementById("loginStatus").style.color = "red";
+    }
+}
+
+/* ===== Game Launch ===== */
+function launchGame(){
+    window.open("https://www.roblox.com/games/9585029211/", "_blank");
+}
+
+/* ===== Execute ===== */
+async function execute(){
+    const code = document.getElementById("codeBox").value;
+
+    await fetch("/execute",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ code })
+    });
+}
+
+/* ===== Script Hub Loader ===== */
+function loadScript(code){
+    document.getElementById("codeBox").value = code;
+    show('executor');
+}
+
+</script>
+
+</body>
+</html>
